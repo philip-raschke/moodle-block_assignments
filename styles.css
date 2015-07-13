@@ -1,0 +1,14 @@
+.block-assignments-thead {
+	background: #C50E20;
+	color: white;
+}
+
+aside.left-menu div.block_assignments div.content div.row-fluid div.span6 {
+	width: 100%;
+	margin-left: 0;
+}
+
+aside.right-menu div.block_assignments div.content div.row-fluid div.span6 {
+	width: 100%;
+	margin-left: 0;
+}

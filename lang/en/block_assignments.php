@@ -1,0 +1,20 @@
+<?php
+$string['pluginname'] = 'Recent Assignments Block';
+$string['assignments'] = 'Assignments';
+$string['graded'] = 'Graded';
+$string['open_assignments'] = 'Open';
+$string['no_assignments'] = 'No assignments currently';
+$string['points'] = 'points';
+$string['assignments:addinstance'] = 'Add a new recent assignments block';
+$string['assignments:myaddinstance'] = 'Add a new recent assignments block to the My Moodle page';
+$string['th_name'] = 'Assignment';
+$string['th_score'] = 'Score';
+$string['th_max'] = 'Points';
+$string['th_deadline'] = 'Due in';
+$string['days'] = 'days';
+$string['day'] = 'day';
+$string['hours'] = 'hours';
+$string['hour'] = 'hour';
+$string['until'] = 'in';
+$string['more'] = 'Show all';
+$string['hide'] = 'Show less';

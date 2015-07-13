@@ -1,0 +1,20 @@
+<?php
+$string['pluginname'] = 'Aufgaben Block';
+$string['assignments'] = 'Aufgaben';
+$string['graded'] = 'Bewertet';
+$string['open_assignments'] = 'Offen';
+$string['no_assignments'] = 'Zurzeit keine Aufgaben';
+$string['points'] = 'Punkte';
+$string['assignments:addinstance'] = 'Füge einen neueste Aufgaben Block hinzu';
+$string['assignments:myaddinstance'] = 'Füge einen neueste Aufgaben Block zur My Moodle Seite hinzu';
+$string['th_name'] = 'Aufgabe';
+$string['th_score'] = 'Erreichte Punkte';
+$string['th_max'] = 'Maximal Punktzahl';
+$string['th_deadline'] = 'Verbleibende Zeit';
+$string['days'] = 'Tage';
+$string['day'] = 'Tag';
+$string['hours'] = 'Stunden';
+$string['hour'] = 'Stunde';
+$string['until'] = 'noch';
+$string['more'] = 'Alle anzeigen';
+$string['hide'] = 'Weniger anzeigen';
