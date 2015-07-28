@@ -143,6 +143,9 @@ class block_assignments extends block_base {
 					$due = html_writer::tag('td', $due, $style);
 					$this->content->text .= html_writer::tag('tr', $name.$due, $displayNone);
 				}
+				else
+					if($rowCounter == 0 AND $counter == count($assignments))
+						$this->content->text .= no_data_row(2);
 			}
 		}
 		if($overflow)
