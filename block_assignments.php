@@ -28,7 +28,7 @@ class block_assignments extends block_base {
 		
 		$this->content->text .= html_writer::start_tag('table', array('id' => 'graded-assign', 'class' => 'table table-responsive table-striped table-hover table-bordered'));		
 		$th_name = html_writer::tag('th', get_string('graded', 'block_assignments'), array('colspan' => '2'));
-		$this->content->text .= html_writer::tag('thead', $th_name, array('class' => 'block-assignments-thead'));			
+		$this->content->text .= html_writer::tag('thead', $th_name);
 		
 		$assign_grades = $DB->get_records('assign_grades', array('userid' => $USER->id));
 		$graded_assignments = array();
@@ -78,7 +78,7 @@ class block_assignments extends block_base {
 		
 		$this->content->text .= html_writer::start_tag('table', array('id' => 'open-assign', 'class' => 'table table-responsive table-striped table-hover table-bordered'));
 		$th_name = html_writer::tag('th', get_string('open_assignments', 'block_assignments'), array('colspan' => '2'));
-		$this->content->text .= html_writer::tag('thead', $th_name, array('class' => 'block-assignments-thead'));
+		$this->content->text .= html_writer::tag('thead', $th_name);
 
 		$courses = enrol_get_my_courses();
 		$assignments = array();
