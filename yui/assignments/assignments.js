@@ -30,7 +30,7 @@ YUI.add('moodle-block_assignments-assignments', function(Y) {
 					
 					var rows = document.querySelectorAll('#' + ids[i] + ' tr');
 					for(var j=0; j < rows.length-1; j++) {
-						if(j <= 5)
+						if(j < 5)
 							continue;
 						
 						rows[j].style.display = 'none';

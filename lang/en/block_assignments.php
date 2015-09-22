@@ -1,12 +1,12 @@
 <?php
-$string['pluginname'] = 'Recent Assignments Block';
+$string['pluginname'] = 'Assignments Block';
 $string['assignments'] = 'Assignments';
 $string['graded'] = 'Graded';
 $string['open_assignments'] = 'Open';
 $string['no_assignments'] = 'No assignments currently';
 $string['points'] = 'points';
-$string['assignments:addinstance'] = 'Add a new recent assignments block';
-$string['assignments:myaddinstance'] = 'Add a new recent assignments block to the My Moodle page';
+$string['assignments:addinstance'] = 'Add a new assignments block';
+$string['assignments:myaddinstance'] = 'Add a new assignments block to the My Moodle page';
 $string['th_name'] = 'Assignment';
 $string['th_score'] = 'Score';
 $string['th_max'] = 'Points';
@@ -18,3 +18,7 @@ $string['hour'] = 'hour';
 $string['until'] = 'in';
 $string['more'] = 'Show all';
 $string['hide'] = 'Show less';
+$string['headerconfig'] = 'Assignments Block Configuration';
+$string['descconfig'] = 'Set global configuration for the assignments block.';
+$string['labelcurrentmonths'] = 'Current Months';
+$string['desccurrentmonths'] = 'The amount of months the startdate of a course may be in the past to still be regarded as current.';
