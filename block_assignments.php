@@ -25,7 +25,6 @@ class block_assignments extends block_base {
 
     public function get_content() {
         global $CFG, $DB, $USER, $PAGE;
-        $CFG->cachejs = false;
         $PAGE->requires->yui_module('moodle-block_assignments-assignments', 'M.block_assignments.assignments.init');
         $PAGE->requires->string_for_js('hide', 'block_assignments');
         $PAGE->requires->string_for_js('more', 'block_assignments');
@@ -40,9 +39,22 @@ class block_assignments extends block_base {
         }
         $this->content->text = '';
 
-        $assigngrades = $DB->get_records('assign_grades', array('userid' => $USER->id));
+        $courses = enrol_get_my_courses();
+        $assignments = array();
         $gradedassignments = array();
         $assignmentpaths = array();
+        foreach ($courses as $course) {
+            if (course_too_old($course)) {
+                continue;
+            }
+            $assignmentpaths = $assignmentpaths + get_course_modules($course);
+            $assignmentsofcourse = $DB->get_records('assign', array('course' => $course->id));
+            foreach ($assignmentsofcourse as $assignment) {
+                $assignments[$assignment->id] = $assignment;
+            }
+        }
+        $assigngrades = $DB->get_records('assign_grades', array('userid' => $USER->id));
+
         $linkinhead = '';
         $gradedassignmentsoutput = '';
 
@@ -57,20 +69,9 @@ class block_assignments extends block_base {
             foreach ($assigngrades as $entry) {
                 $counter++;
 
-                $assignment = $DB->get_record('assign', array('id' => $entry->assignment));
+                $assignment = $assignments[$entry->assignment];
                 array_push($gradedassignments, $assignment->id);
-
-                $course = $DB->get_record('course', array('id' => $assignment->course));
-                if (course_too_old($course)) {
-                    if ($counter == count($assigngrades)) {
-                        $gradedassignmentsoutput .= no_data_row(2);
-                    }
-                    continue;
-                }
-
-                if (!in_array($course->id, array_keys($assignmentpaths))) {
-                    $assignmentpaths = $assignmentpaths + get_course_modules($course);
-                }
+                $course = $courses[$assignment->course];
 
                 $rowcounter++;
                 $displaynone = null;
@@ -104,14 +105,6 @@ class block_assignments extends block_base {
         $this->content->text .= $gradedassignmentsoutput;
         $this->content->text .= html_writer::end_tag('table');
 
-        $courses = enrol_get_my_courses();
-        $assignments = array();
-        foreach ($courses as $course) {
-            if (course_too_old($course)) {
-                continue;
-            }
-            $assignments = array_merge($assignments, $DB->get_records('assign', array('course' => $course->id)));
-        }
         $linkinhead = '';
         $openassignmentsoutput = '';
 
@@ -123,14 +116,10 @@ class block_assignments extends block_base {
             $counter = 0;
             $rowcounter = 0;
             $overflow = false;
-
             foreach ($assignments as $assignment) {
-                $counter++;
 
-                $course = $DB->get_record('course', array('id' => $assignment->course));
-                if (!in_array($course->id, array_keys($assignmentpaths))) {
-                    $assignmentpaths = $assignmentpaths + get_course_modules($course);
-                }
+                $counter++;
+                $course = $courses[$assignment->course];
 
                 if (!in_array($assignment->id, $gradedassignments)) {
                     $datedue = date_create();
@@ -159,7 +148,7 @@ class block_assignments extends block_base {
                     $due = get_string('until', 'block_assignments')." ".$due;
 
                     $rowcounter++;
-                    $course = $DB->get_record('course', array('id' => $assignment->course));
+                    $course = $courses[$assignment->course];
 
                     $displaynone = null;
                     if ($rowcounter > 5) {
