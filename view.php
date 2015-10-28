@@ -13,6 +13,13 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * @package   block_assignments
+ * @copyright 2015, Senan Sharhan, Philip Raschke
+ * @license   GNU General Public License <http://www.gnu.org/licenses/>
+ */
+
 require_once('../../config.php');
 
 require_login();

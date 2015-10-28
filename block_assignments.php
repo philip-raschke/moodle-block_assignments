@@ -13,12 +13,27 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * @package   block_assignments
+ * @copyright 2015, Senan Sharhan, Philip Raschke
+ * @license   GNU General Public License <http://www.gnu.org/licenses/>
+ */
+
+/**
+ * Class block_assignments
+ * Main class of block plugin
+ * Lists all graded and all open assignments of a user.
+ */
 class block_assignments extends block_base {
 
     public function init() {
         $this->title = get_string('assignments', 'block_assignments');
     }
 
+    /**
+     * Enables reading from configuration
+     */
     public function has_config() {
         return true;
     }
@@ -44,10 +59,11 @@ class block_assignments extends block_base {
         $gradedassignments = array();
         $assignmentpaths = array();
         foreach ($courses as $course) {
-            if (course_too_old($course)) {
+            if (block_assignments_course_too_old($course)) {
                 continue;
             }
-            $assignmentpaths = $assignmentpaths + get_course_modules($course);
+            $assignmentpaths = $assignmentpaths + block_assignments_get_course_modules($course);
+            // TODO: remove this query by using IN and LEFT JOIN.
             $assignmentsofcourse = $DB->get_records('assign', array('course' => $course->id));
             foreach ($assignmentsofcourse as $assignment) {
                 $assignments[$assignment->id] = $assignment;
@@ -57,14 +73,15 @@ class block_assignments extends block_base {
 
         $linkinhead = '';
         $gradedassignmentsoutput = '';
+        $overflow = false;
+        $style = array('style' => 'text-align: right;');
 
         if (empty($assigngrades)) {
-            $gradedassignmentsoutput .= no_data_row(2);
+            $gradedassignmentsoutput .= block_assignments_no_data_row(2);
         } else {
-            usort($assigngrades, 'graded_more_recent');
+            usort($assigngrades, 'block_assignments_graded_more_recent');
             $counter = 0;
             $rowcounter = 0;
-            $overflow = false;
 
             foreach ($assigngrades as $entry) {
                 $counter++;
@@ -84,16 +101,15 @@ class block_assignments extends block_base {
                 $linktext = "[".$course->fullname."] ".$assignment->name;
                 $link = html_writer::tag('a', $linktext, array('href' => $href));
                 $name = html_writer::tag('td', $link, null);
-                $style = array('style' => 'text-align: right;');
                 $grade = html_writer::tag('td', number_format($entry->grade, 1)." / ".number_format($assignment->grade, 1), $style);
                 $gradedassignmentsoutput .= html_writer::tag('tr', $name.$grade, $displaynone);
             }
-        }
-        if ($overflow) {
-            $linktext = '<b>'.get_string('more', 'block_assignments').'</b>';
-            $href = new moodle_url('/blocks/assignments/view.php');
-            $class = 'btn-show-all btn-show-all-right';
-            $linkinhead = html_writer::tag('a', $linktext, array('class' => $class, 'href' => $href));
+            if ($overflow) {
+                $linktext = '<b>'.get_string('more', 'block_assignments').'</b>';
+                $href = new moodle_url('/blocks/assignments/view.php');
+                $class = 'btn-show-all btn-show-all-right';
+                $linkinhead = html_writer::tag('a', $linktext, array('class' => $class, 'href' => $href));
+            }
         }
 
         $this->content->text .= html_writer::start_tag('div', array('class' => 'row-fluid'));
@@ -107,15 +123,15 @@ class block_assignments extends block_base {
 
         $linkinhead = '';
         $openassignmentsoutput = '';
+        $overflow = false;
 
         if (empty($assignments)) {
-            $openassignmentsoutput .= no_data_row(2);
+            $openassignmentsoutput .= block_assignments_no_data_row(2);
         } else {
-            usort($assignments, 'due_more_recent');
+            usort($assignments, 'block_assignments_due_more_recent');
 
             $counter = 0;
             $rowcounter = 0;
-            $overflow = false;
             foreach ($assignments as $assignment) {
 
                 $counter++;
@@ -130,7 +146,7 @@ class block_assignments extends block_base {
                     $due = $duein->format('%R%a');
                     if ($due < + 0) {
                         if ($counter == count($assignments)) {
-                            $openassignmentsoutput .= no_data_row(2);
+                            $openassignmentsoutput .= block_assignments_no_data_row(2);
                         }
                         continue;
                     } else if ($due == + 0) {
@@ -163,16 +179,16 @@ class block_assignments extends block_base {
                     $openassignmentsoutput .= html_writer::tag('tr', $name.$due, $displaynone);
                 } else {
                     if ($rowcounter == 0 AND $counter == count($assignments)) {
-                        $openassignmentsoutput .= no_data_row(2);
+                        $openassignmentsoutput .= block_assignments_no_data_row(2);
                     }
                 }
             }
-        }
-        if ($overflow) {
-            $linktext = '<b>'.get_string('more', 'block_assignments').'</b>';
-            $class = 'btn-show-all btn-show-all-right';
-            $href = new moodle_url('/blocks/assignments/view.php');
-            $linkinhead = html_writer::tag('a', $linktext, array('class' => $class, 'href' => $href));
+            if ($overflow) {
+                $linktext = '<b>'.get_string('more', 'block_assignments').'</b>';
+                $class = 'btn-show-all btn-show-all-right';
+                $href = new moodle_url('/blocks/assignments/view.php');
+                $linkinhead = html_writer::tag('a', $linktext, array('class' => $class, 'href' => $href));
+            }
         }
 
         $this->content->text .= html_writer::end_tag('div');
@@ -195,15 +211,12 @@ class block_assignments extends block_base {
 
 }
 
-function append_show_all_button($colspan) {
-    $linktext = '<b>'.get_string('more', 'block_assignments').'</b>';
-    $href = new moodle_url('/blocks/assignments/view.php');
-    $link = html_writer::tag('a', $linktext, array('class' => 'btn-show-all', 'href' => $href));
-    $showbtn = html_writer::tag('td', $link, array('colspan' => $colspan, 'style' => 'background-color: white;'));
-    return html_writer::tag('tr', $showbtn, array('class' => 'more'));
-}
-
-function get_course_modules($course) {
+/**
+ * Used to retrieve the paths to the assignments
+ * @param $course a course
+ * @return two dimensional array - array[courseid][assignmentid]
+ */
+function block_assignments_get_course_modules($course) {
     $assignmentpaths = array();
     $cms = get_fast_modinfo($course)->get_cms();
     foreach ($cms as $cm) {
@@ -222,26 +235,47 @@ function get_course_modules($course) {
     return $assignmentpaths;
 }
 
-function graded_more_recent($a, $b) {
+/**
+ * This function decides which of two assignments was graded more recent
+ * @param $a, $b - two assignments
+ * @return int -1 or 1, respectively
+ */
+function block_assignments_graded_more_recent($a, $b) {
     if ($a->timemodified == $b->timemodified) {
         return 0;
     }
     return ($a->timemodified > $b->timemodified) ? -1 : 1;
 }
 
-function due_more_recent($a, $b) {
+/**
+ * This function decides which of two assignments is due more recent
+ * @param $a, $b - two assignments
+ * @return int -1 or 1, respectively
+ */
+function block_assignments_due_more_recent($a, $b) {
     if ($a->duedate == $b->duedate) {
         return 0;
     }
     return ($a->duedate < $b->duedate) ? -1 : 1;
 }
 
-function no_data_row($colspan) {
+/**
+ * This function displays a row hinting that no data is available
+ * @param $colspan - number of cols the row has to span
+ * @return html - a row
+ */
+function block_assignments_no_data_row($colspan) {
     $td = html_writer::tag('td', get_string('no_assignments', 'block_assignments'), array('colspan' => $colspan));
     return html_writer::tag('tr', $td, null);
 }
 
-function course_too_old($course) {
+/**
+ * This function decides whether a course is too old
+ * Therefore a configuration value is used to decide the maximum age of a course
+ * @param $course - the respective course
+ * @return bool true or false
+ */
+function block_assignments_course_too_old($course) {
     $max = get_config('block_assignments', 'current_months') + 1;
     $coursestart = date_create();
     date_timestamp_set($coursestart, $course->startdate);
