@@ -55,6 +55,7 @@ class block_assignments extends block_base {
         $this->content->text = '';
 
         $courses = enrol_get_my_courses();
+        $courseids = array();
         $assignments = array();
         $gradedassignments = array();
         $assignmentpaths = array();
@@ -63,13 +64,18 @@ class block_assignments extends block_base {
                 continue;
             }
             $assignmentpaths = $assignmentpaths + block_assignments_get_course_modules($course);
-            // TODO: remove this query by using IN and LEFT JOIN.
-            $assignmentsofcourse = $DB->get_records('assign', array('course' => $course->id));
-            foreach ($assignmentsofcourse as $assignment) {
-                $assignments[$assignment->id] = $assignment;
-            }
+            array_push($courseids, $course->id);
         }
-        $assigngrades = $DB->get_records('assign_grades', array('userid' => $USER->id));
+        list($insql, $inparams) = $DB->get_in_or_equal($courseids);
+        $sql = 'SELECT *
+                FROM {assign}
+                WHERE course '.$insql;
+        $assignments = $DB->get_records_sql($sql, $inparams);
+
+        $sql = 'SELECT *
+                FROM {assign_grades}
+                WHERE userid = ?';
+        $assigngrades = $DB->get_records_sql($sql, array($USER->id));
 
         $linkinhead = '';
         $gradedassignmentsoutput = '';
