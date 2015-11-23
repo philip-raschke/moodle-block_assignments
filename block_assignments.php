@@ -55,27 +55,32 @@ class block_assignments extends block_base {
         $this->content->text = '';
 
         $courses = enrol_get_my_courses();
-        $courseids = array();
-        $assignments = array();
-        $gradedassignments = array();
-        $assignmentpaths = array();
-        foreach ($courses as $course) {
-            if (block_assignments_course_too_old($course)) {
-                continue;
+        if (count($courses) > 0) {
+            $courseids = array();
+            $assignments = array();
+            $gradedassignments = array();
+            $assignmentpaths = array();
+            foreach ($courses as $course) {
+                if (block_assignments_course_too_old($course)) {
+                    continue;
+                }
+                $assignmentpaths = $assignmentpaths + block_assignments_get_course_modules($course);
+                array_push($courseids, $course->id);
             }
-            $assignmentpaths = $assignmentpaths + block_assignments_get_course_modules($course);
-            array_push($courseids, $course->id);
-        }
-        list($insql, $inparams) = $DB->get_in_or_equal($courseids);
-        $sql = 'SELECT *
-                FROM {assign}
-                WHERE course '.$insql;
-        $assignments = $DB->get_records_sql($sql, $inparams);
+            list($insql, $inparams) = $DB->get_in_or_equal($courseids);
+            $sql = 'SELECT *
+                    FROM {assign}
+                    WHERE course '.$insql;
+            $assignments = $DB->get_records_sql($sql, $inparams);
 
-        $sql = 'SELECT *
-                FROM {assign_grades}
-                WHERE userid = ?';
-        $assigngrades = $DB->get_records_sql($sql, array($USER->id));
+            $sql = 'SELECT *
+                    FROM {assign_grades}
+                    WHERE userid = ?';
+            $assigngrades = $DB->get_records_sql($sql, array($USER->id));
+        } else {
+            $assigngrades = array();
+            $assignments = array();
+        }
 
         $linkinhead = '';
         $gradedassignmentsoutput = '';
