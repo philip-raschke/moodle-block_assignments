@@ -97,6 +97,9 @@ class block_assignments extends block_base {
             foreach ($assigngrades as $entry) {
                 $counter++;
 
+                if (!array_key_exists($entry->assignment, $assignments)) {
+                    continue;
+                }
                 $assignment = $assignments[$entry->assignment];
                 array_push($gradedassignments, $assignment->id);
                 $course = $courses[$assignment->course];
